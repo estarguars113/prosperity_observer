@@ -1,0 +1,44 @@
+[
+  {
+    "id": "UHC_SCI",
+    "name": "Health Access",
+    "description": "% population with access to general health system",
+    "url": "https://api.worldbank.org/v2/country/all/indicator/UHC_SCI?format=json&per_page=1000",
+    "category": "Health"
+  },
+  {
+    "id": "SH.H2O.SMDW.ZS",
+    "name": "Water Access",
+    "description": "% of population with access to free water",
+    "url": "https://api.worldbank.org/v2/country/all/indicator/SH.H2O.SMDW.ZS?format=json&per_page=1000",
+    "category": "Water Sanitation"
+  },
+  {
+    "id": "SL.TLF.ADVN.ZS",
+    "name": "Education Access",
+    "description": "% population in working age with high education",
+    "url": "https://api.worldbank.org/v2/country/all/indicator/SL.TLF.ADVN.ZS?format=json&per_page=1000",
+    "category": "Education Access"
+  },
+  {
+    "id": "SI.POV.DDAY",
+    "name": "Poverty Rate",
+    "description": "% population in poverty",
+    "url": "https://api.worldbank.org/v2/country/all/indicator/SI.POV.DDAY?format=json&per_page=1000",
+    "category": "Poverty"
+  },
+  {
+    "id": "WB_HCP_EMP_NIFL_A",
+    "name": "Informal Employment",
+    "description": "% informal employment",
+    "url": "https://api.worldbank.org/v2/country/all/indicator/WB_HCP_EMP_NIFL_A?format=json&per_page=1000",
+    "category": "Employment"
+  },
+  {
+    "id": "WB_CSC_ER_PTD_TOTL_ZS",
+    "name": "Protected Areas",
+    "description": "total hectares of environments protected",
+    "url": "https://api.worldbank.org/v2/country/all/indicator/WB_CSC_ER_PTD_TOTL_ZS?format=json&per_page=1000",
+    "category": "Conservation"
+  }
+]
