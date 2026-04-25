@@ -1,54 +1,104 @@
 //! Binary entry point for the Prosperity Lakehouse.
 
 use anyhow::{Context, Result};
+use clap::{Parser, Subcommand};
 use tracing::{info, instrument};
 
-use prosperity_lakehouse::{Indicator, IndicatorFetcher, LakehouseConfig, ProsperityLakehouse};
+use prosperity_lakehouse::{
+    flatten_records, Indicator, IndicatorFetcher, LakehouseConfig, ProsperityLakehouse, StorageMode,
+};
+
+#[derive(Parser)]
+#[command(name = "prosperity-lakehouse")]
+#[command(about = "Fetch prosperity indicators and save them to a partitioned lakehouse")]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand, Debug, Clone)]
+enum Commands {
+    /// Save files locally partitioned by indicator/country/year
+    Local,
+    /// Save files to AWS S3 partitioned by indicator/country/year
+    Aws,
+    /// Save files to Azure Blob Storage partitioned by indicator/country/year
+    Azure,
+}
+
+impl From<Commands> for StorageMode {
+    fn from(cmd: Commands) -> Self {
+        match cmd {
+            Commands::Local => StorageMode::Local,
+            Commands::Aws => StorageMode::Aws,
+            Commands::Azure => StorageMode::Azure,
+        }
+    }
+}
 
 #[tokio::main]
 #[instrument]
 async fn main() -> Result<()> {
-    // Initialize logging
     tracing_subscriber::fmt()
-        .with_env_filter("prosperity_lakehouse=info,deltalake=warn")
+        .with_env_filter("prosperity_lakehouse=info")
         .with_target(false)
         .init();
 
     info!("Starting Prosperity Lakehouse");
 
-    // Load configuration
-    let config = LakehouseConfig::default();
+    let cli = Cli::parse();
+    let config = LakehouseConfig::from_mode(cli.command.into());
 
-    // Initialize lakehouse
+    info!(mode = ?config.mode, "Storage mode selected");
+
     let lakehouse = ProsperityLakehouse::new(config)
         .await
         .context("Failed to initialize lakehouse")?;
 
-    // Load indicators from external JSON configuration file
     let indicators = Indicator::load_all()
         .await
         .context("Failed to load indicators from configuration file")?;
 
-    // Fetch all indicators with retry logic, automatically skip failed endpoints
     let fetcher = IndicatorFetcher::default();
-    let successful_indicators = fetcher.fetch_all_indicators(indicators).await;
+    let outcome = fetcher.fetch_all_indicators(indicators).await;
+
+    // Print failure summary if any indicators failed
+    if !outcome.failed.is_empty() {
+        eprintln!("\n❌ FAILED INDICATORS:");
+        eprintln!("{:<30} {:<25} {}", "ID", "Name", "Error");
+        eprintln!("{}", "-".repeat(120));
+        for (indicator, error) in &outcome.failed {
+            eprintln!(
+                "{:<30} {:<25} {}",
+                indicator.id,
+                indicator.name,
+                error.chars().take(60).collect::<String>()
+            );
+        }
+        eprintln!();
+
+        return Err(anyhow::anyhow!(
+            "{} of {} indicators failed to fetch — no data written to lakehouse",
+            outcome.failed.len(),
+            outcome.successful.len() + outcome.failed.len()
+        ));
+    }
 
     info!(
-        count = successful_indicators.len(),
+        count = outcome.successful.len(),
         "Processing successfully fetched indicators"
     );
 
-    // Convert to Arrow RecordBatch and write to Delta table
-    let record_batch = ProsperityLakehouse::indicators_to_record_batch(&successful_indicators)
-        .context("Failed to convert indicators to record batch")?;
+    let records = flatten_records(&outcome.successful);
+
+    info!(record_count = records.len(), "Flattened indicator records");
 
     lakehouse
-        .write_batch("transactions", record_batch)
+        .write_records(&records)
         .await
-        .context("Failed to write data to Delta lakehouse")?;
+        .context("Failed to write data to lakehouse")?;
 
     info!("All operations completed successfully");
-    info!("Delta files stored locally in ./lakehouse/transactions/");
 
     Ok(())
 }

@@ -1,9 +1,9 @@
 [
   {
-    "id": "UHC_SCI",
-    "name": "Health Access",
-    "description": "% population with access to general health system",
-    "url": "https://api.worldbank.org/v2/country/all/indicator/UHC_SCI?format=json&per_page=1000",
+    "id": "SP.DYN.LE00.IN",
+    "name": "Life Expectancy",
+    "description": "Life expectancy at birth, total (years)",
+    "url": "https://api.worldbank.org/v2/country/all/indicator/SP.DYN.LE00.IN?format=json&per_page=1000",
     "category": "Health"
   },
   {
@@ -28,17 +28,17 @@
     "category": "Poverty"
   },
   {
-    "id": "WB_HCP_EMP_NIFL_A",
-    "name": "Informal Employment",
-    "description": "% informal employment",
-    "url": "https://api.worldbank.org/v2/country/all/indicator/WB_HCP_EMP_NIFL_A?format=json&per_page=1000",
+    "id": "SL.UEM.TOTL.ZS",
+    "name": "Unemployment Rate",
+    "description": "Unemployment as % of total labor force",
+    "url": "https://api.worldbank.org/v2/country/all/indicator/SL.UEM.TOTL.ZS?format=json&per_page=1000",
     "category": "Employment"
   },
   {
-    "id": "WB_CSC_ER_PTD_TOTL_ZS",
+    "id": "ER.PTD.TOTL.ZS",
     "name": "Protected Areas",
-    "description": "total hectares of environments protected",
-    "url": "https://api.worldbank.org/v2/country/all/indicator/WB_CSC_ER_PTD_TOTL_ZS?format=json&per_page=1000",
+    "description": "Terrestrial and marine protected areas (% of total territory)",
+    "url": "https://api.worldbank.org/v2/country/all/indicator/ER.PTD.TOTL.ZS?format=json&per_page=1000",
     "category": "Conservation"
   }
 ]

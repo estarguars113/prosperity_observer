@@ -1,6 +1,6 @@
 //! Prosperity Lakehouse
 //!
-//! A high-performance Delta Lake implementation for prosperity indicator data,
+//! A high-performance data lake implementation for prosperity indicator data,
 //! following Rust best practices.
 
 #![forbid(unsafe_code)]
@@ -11,7 +11,7 @@ pub mod error;
 pub mod indicators;
 pub mod lakehouse;
 
-pub use config::LakehouseConfig;
+pub use config::{LakehouseConfig, StorageMode};
 pub use error::LakehouseError;
-pub use indicators::{Indicator, IndicatorFetcher};
+pub use indicators::{flatten_records, Indicator, IndicatorFetcher, IndicatorRecord};
 pub use lakehouse::ProsperityLakehouse;
