@@ -1,0 +1,4 @@
+resource_group_name  = "rg-prosperity-lakehouse"
+location             = "westeurope"
+storage_account_name = "prosperitylakehouse"
+container_name       = "transactions"
