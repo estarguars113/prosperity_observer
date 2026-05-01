@@ -3,6 +3,7 @@ name = "prosperity_lakehouse"
 version = "0.0.1"
 edition = "2024"
 rust-version = "1.85"
+default-run = "prosperity_lakehouse"
 
 [dependencies]
 anyhow = "1.0"

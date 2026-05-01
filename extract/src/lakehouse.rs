@@ -118,7 +118,7 @@ impl ProsperityLakehouse {
                             true,
                         ),
                     ])
-                    .with_partition_columns(["indicator_id", "country_id", "year"])
+                    .with_partition_columns(["indicator_id", "year"])
                     .with_save_mode(SaveMode::Ignore)
                     .await?;
 

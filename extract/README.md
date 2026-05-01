@@ -121,6 +121,12 @@ cargo run -- azure
 # Table will be created at az://my-container/transactions
 ```
 
+or for local testing still, but with azure configuration
+
+```bash
+docker run -p 10000:10000 -p 10001:10001 -p 10002:10002 mcr.microsoft.com/azure-storage/azurite
+```
+
 ---
 
 ## Indicator Download Status

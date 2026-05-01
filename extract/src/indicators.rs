@@ -4,6 +4,7 @@ use std::time::Duration;
 
 use anyhow::{Context, Result};
 use reqwest::Client;
+use futures::StreamExt;
 use serde::Deserialize;
 use tokio_retry::{Retry, strategy::FixedInterval};
 use tracing::{debug, error, info, instrument};
@@ -59,7 +60,7 @@ pub struct IndicatorRecord {
 pub fn flatten_records(
     fetched: &[(Indicator, serde_json::Value)],
 ) -> Vec<IndicatorRecord> {
-    let mut records = Vec::new();
+    let mut records: Vec<IndicatorRecord> = Vec::new();
 
     for (_indicator, response) in fetched {
         let data_array = response
@@ -218,20 +219,22 @@ impl IndicatorFetcher {
         let total = indicators.len();
         info!("Starting fetch for {} indicators", total);
 
-        let futures = indicators.into_iter().map(|indicator| async move {
-            match self.fetch_indicator(&indicator).await {
-                Ok(FetchResult::Success(data)) => Ok((indicator, data)),
-                Ok(FetchResult::Failure(msg)) => Err((indicator, msg)),
-                Err(e) => Err((indicator, format!("Unexpected error: {}", e))),
-            }
-        });
-
-        let results = futures::future::join_all(futures).await;
+        // Stream-based approach: limit concurrency to 5 requests at a time and
+        // process each result as soon as it completes.
+        let mut stream = futures::stream::iter(indicators)
+            .map(|indicator| async move {
+                match self.fetch_indicator(&indicator).await {
+                    Ok(FetchResult::Success(data)) => Ok((indicator, data)),
+                    Ok(FetchResult::Failure(msg)) => Err((indicator, msg)),
+                    Err(e) => Err((indicator, format!("Unexpected error: {}", e))),
+                }
+            })
+            .buffer_unordered(5);
 
         let mut successful = Vec::new();
         let mut failed = Vec::new();
 
-        for result in results {
+        while let Some(result) = stream.next().await {
             match result {
                 Ok(pair) => successful.push(pair),
                 Err(pair) => failed.push(pair),
