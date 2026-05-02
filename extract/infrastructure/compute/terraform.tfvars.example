@@ -1,0 +1,11 @@
+resource_group_name      = "rg-prosperity-lakehouse"
+location                 = "westeurope"
+function_app_name        = "func-prosperity-extract"
+storage_account_name     = "prosperitylakehouse"
+lakehouse_container_name = "transactions"
+
+# Timer schedule — can also be set via the TF_VAR_timer_schedule env var.
+# Examples:
+#   "0 0 2 * * *"  -> daily at 02:00 UTC
+#   "0 */6 * * * *" -> every 6 hours
+timer_schedule           = "0 0 2 * * *"
